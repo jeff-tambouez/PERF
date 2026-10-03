@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Barre de musculation stylisée, blanche sur fond bleu -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- barre -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,52h48v4h-48z" />
+    <!-- disques gauche -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,40h6v28h-6z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M41,44h4v20h-4z" />
+    <!-- disques droite -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M68,40h6v28h-6z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M63,44h4v20h-4z" />
+</vector>

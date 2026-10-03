@@ -1,0 +1,13 @@
+id,nom,type,archive,ordre
+1,Front squat,BARRE,0,0
+2,Squat,BARRE,0,1
+3,Traction pronation,POIDS_DU_CORPS,0,2
+11,Traction supination,POIDS_DU_CORPS,0,3
+4,Pompe,POIDS_DU_CORPS,0,4
+5,Dips,POIDS_DU_CORPS,0,5
+12,Dips Front,POIDS_DU_CORPS,0,6
+6,Développé couché,BARRE,0,7
+7,Muscle up,POIDS_DU_CORPS,0,8
+8,Deadlift,BARRE,0,9
+9,Développé militaire,BARRE,0,10
+10,Rowing,BARRE,0,11
