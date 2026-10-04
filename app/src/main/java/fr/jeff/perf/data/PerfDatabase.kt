@@ -34,7 +34,7 @@ abstract class PerfDatabase : RoomDatabase() {
 }
 
 /**
- * Pré-remplissage à la création de la base, depuis assets/seed/*.csv
+ * Pré-remplissage à la création de la base, depuis assets/seed/.csv
  * (exercices.csv, performances.csv et, s'il existe, poids_corps.csv).
  */
 object Preremplissage {
