@@ -142,7 +142,7 @@ fun GestionScreen(etat: EtatApp, nav: NavController) {
 }
 
 @Composable
-private fun DialogueExercice(
+fun DialogueExercice(
     initial: Exercice,
     onFermer: () -> Unit,
     nombrePerformances: suspend () -> Int,
