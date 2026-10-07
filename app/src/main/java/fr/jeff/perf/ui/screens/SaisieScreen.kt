@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import fr.jeff.perf.data.Exercice
 import fr.jeff.perf.data.Performance
+import fr.jeff.perf.data.TypeExercice
 import fr.jeff.perf.data.estBarre
 import fr.jeff.perf.domain.Format
 import fr.jeff.perf.ui.EtatApp
@@ -80,6 +82,7 @@ fun SaisieScreen(etat: EtatApp, nav: NavController, perfId: Long?, exIdInitial: 
     var prerempliPour by remember { mutableStateOf<Long?>(null) }
     var choixDateOuvert by remember { mutableStateOf(false) }
     var menuExercice by remember { mutableStateOf(false) }
+    var nouvelExercice by remember { mutableStateOf(false) }
     /** Évite un double enregistrement ou un double retour pendant l'animation de sortie. */
     var termine by remember { mutableStateOf(false) }
 
@@ -252,9 +255,27 @@ fun SaisieScreen(etat: EtatApp, nav: NavController, perfId: Long?, exIdInitial: 
                             onClick = { exId = e.id; menuExercice = false },
                         )
                     }
+                    DropdownMenuItem(
+                        text = { Text("Nouvel exercice…", color = MaterialTheme.colorScheme.primary) },
+                        leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                        onClick = { menuExercice = false; nouvelExercice = true },
+                    )
                 }
             }
             Spacer(Modifier.height(16.dp))
+
+            if (nouvelExercice) {
+                DialogueExercice(
+                    initial = Exercice(nom = "", type = TypeExercice.BARRE),
+                    onFermer = { nouvelExercice = false },
+                    nombrePerformances = { 0 },
+                    onSupprimer = null,
+                    onEnregistrer = { e ->
+                        exId = etat.repo.ajouter(e)
+                        nouvelExercice = false
+                    },
+                )
+            }
 
             if (exercice != null) {
                 // Mode

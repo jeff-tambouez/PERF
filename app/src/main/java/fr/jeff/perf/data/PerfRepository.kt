@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipEntry
@@ -13,13 +14,18 @@ import java.util.zip.ZipOutputStream
 
 class NomDejaUtiliseException : Exception("Ce nom d'exercice existe déjà")
 
+private val comparateurNom: Comparator<Exercice> = java.text.Collator.getInstance(java.util.Locale.FRENCH)
+    .apply { strength = java.text.Collator.PRIMARY }
+    .let { c -> Comparator { a, b -> c.compare(a.nom, b.nom) } }
+
 class PerfRepository(private val db: PerfDatabase) {
     private val exercices = db.exerciceDao()
     private val performances = db.performanceDao()
     private val pesees = db.peseeDao()
 
     // ---- Lecture ----
-    fun exercices(): Flow<List<Exercice>> = exercices.tous()
+    /** Triés par ordre alphabétique (insensible à la casse et aux accents). */
+    fun exercices(): Flow<List<Exercice>> = exercices.tous().map { it.sortedWith(comparateurNom) }
     fun exercice(id: Long): Flow<Exercice?> = exercices.parId(id)
     fun performances(): Flow<List<Performance>> = performances.toutes()
     fun performancesDe(exerciceId: Long): Flow<List<Performance>> = performances.parExercice(exerciceId)
@@ -48,14 +54,12 @@ class PerfRepository(private val db: PerfDatabase) {
         throw NomDejaUtiliseException()
     }
 
-    /** Déplace un exercice d'un cran dans l'ordre d'affichage (sens = -1 vers le haut, +1 vers le bas). */
-    suspend fun deplacer(e: Exercice, sens: Int) {
-        val liste = exercices.tousMaintenant().toMutableList()
-        val i = liste.indexOfFirst { it.id == e.id }
-        val j = i + sens
-        if (i < 0 || j !in liste.indices) return
-        val tmp = liste[i]; liste[i] = liste[j]; liste[j] = tmp
-        exercices.modifierTous(liste.mapIndexed { index, ex -> ex.copy(ordre = index) })
+    suspend fun nombrePerformances(e: Exercice): Int = performances.compter(e.id)
+
+    /** Supprime définitivement l'exercice et tout son historique de performances. */
+    suspend fun supprimer(e: Exercice) = db.withTransaction {
+        performances.supprimerDeExercice(e.id)
+        exercices.supprimerParId(e.id)
     }
 
     // ---- Export / import ----

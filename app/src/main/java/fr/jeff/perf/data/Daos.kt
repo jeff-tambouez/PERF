@@ -36,6 +36,9 @@ interface ExerciceDao {
 
     @Query("DELETE FROM exercice")
     suspend fun toutSupprimer()
+
+    @Query("DELETE FROM exercice WHERE id = :id")
+    suspend fun supprimerParId(id: Long)
 }
 
 @Dao
@@ -63,6 +66,12 @@ interface PerformanceDao {
 
     @Query("DELETE FROM performance")
     suspend fun toutSupprimer()
+
+    @Query("SELECT COUNT(*) FROM performance WHERE exercice_id = :exerciceId")
+    suspend fun compter(exerciceId: Long): Int
+
+    @Query("DELETE FROM performance WHERE exercice_id = :exerciceId")
+    suspend fun supprimerDeExercice(exerciceId: Long)
 }
 
 @Dao
