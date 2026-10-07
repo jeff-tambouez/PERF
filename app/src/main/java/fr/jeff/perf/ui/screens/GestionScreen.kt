@@ -52,7 +52,7 @@ import fr.jeff.perf.domain.Format
 import fr.jeff.perf.ui.EtatApp
 import kotlinx.coroutines.launch
 
-/** Ajouter, renommer, archiver et réordonner les exercices. L'archivage masque sans supprimer l'historique. */
+/** Ajouter, renommer, archiver, supprimer et réordonner les exercices. L'archivage masque sans supprimer l'historique. */
 @Composable
 fun GestionScreen(etat: EtatApp, nav: NavController) {
     val exercices by remember { etat.repo.exercices() }.collectAsState(initial = emptyList())
@@ -125,6 +125,14 @@ fun GestionScreen(etat: EtatApp, nav: NavController) {
         DialogueExercice(
             initial = e,
             onFermer = { edition = null },
+            nombrePerformances = { etat.repo.nombrePerformances(e) },
+            onSupprimer = if (e.id != 0L) {
+                {
+                    etat.repo.supprimer(e)
+                    edition = null
+                    etat.message("« ${e.nom} » supprimé")
+                }
+            } else null,
             onEnregistrer = { modifie ->
                 if (modifie.id == 0L) etat.repo.ajouter(modifie) else etat.repo.modifier(modifie)
                 edition = null
@@ -137,9 +145,12 @@ fun GestionScreen(etat: EtatApp, nav: NavController) {
 private fun DialogueExercice(
     initial: Exercice,
     onFermer: () -> Unit,
+    nombrePerformances: suspend () -> Int,
+    onSupprimer: (suspend () -> Unit)?,
     onEnregistrer: suspend (Exercice) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    var confirmation by remember { mutableStateOf<Int?>(null) }
     var nom by remember { mutableStateOf(initial.nom) }
     var type by remember { mutableStateOf(initial.type) }
     var barreTexte by remember { mutableStateOf(Format.nombre(initial.poidsBarreKg)) }
@@ -207,6 +218,35 @@ private fun DialogueExercice(
                 },
             ) { Text("Enregistrer") }
         },
-        dismissButton = { TextButton(onClick = onFermer) { Text("Annuler") } },
+        dismissButton = {
+            Row {
+                if (onSupprimer != null) {
+                    TextButton(onClick = { scope.launch { confirmation = nombrePerformances() } }) {
+                        Text("Supprimer", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+                TextButton(onClick = onFermer) { Text("Annuler") }
+            }
+        },
     )
+
+    val nbPerfs = confirmation
+    if (nbPerfs != null && onSupprimer != null) {
+        AlertDialog(
+            onDismissRequest = { confirmation = null },
+            title = { Text("Supprimer « ${initial.nom} » ?") },
+            text = {
+                Text(
+                    if (nbPerfs > 0) "Les $nbPerfs performances enregistrées pour cet exercice seront aussi supprimées définitivement. Pour simplement le masquer, archivez-le plutôt."
+                    else "Cet exercice n'a aucune performance enregistrée."
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { scope.launch { onSupprimer() } }) {
+                    Text("Supprimer", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmation = null }) { Text("Annuler") } },
+        )
+    }
 }

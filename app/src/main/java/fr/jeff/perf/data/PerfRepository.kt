@@ -48,6 +48,14 @@ class PerfRepository(private val db: PerfDatabase) {
         throw NomDejaUtiliseException()
     }
 
+    suspend fun nombrePerformances(e: Exercice): Int = performances.compter(e.id)
+
+    /** Supprime définitivement l'exercice et tout son historique de performances. */
+    suspend fun supprimer(e: Exercice) = db.withTransaction {
+        performances.supprimerDeExercice(e.id)
+        exercices.supprimerParId(e.id)
+    }
+
     /** Déplace un exercice d'un cran dans l'ordre d'affichage (sens = -1 vers le haut, +1 vers le bas). */
     suspend fun deplacer(e: Exercice, sens: Int) {
         val liste = exercices.tousMaintenant().toMutableList()
