@@ -13,12 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -52,7 +50,7 @@ import fr.jeff.perf.domain.Format
 import fr.jeff.perf.ui.EtatApp
 import kotlinx.coroutines.launch
 
-/** Ajouter, renommer, archiver, supprimer et réordonner les exercices. L'archivage masque sans supprimer l'historique. */
+/** Ajouter, renommer, archiver et supprimer les exercices. L'archivage masque sans supprimer l'historique. */
 @Composable
 fun GestionScreen(etat: EtatApp, nav: NavController) {
     val exercices by remember { etat.repo.exercices() }.collectAsState(initial = emptyList())
@@ -80,7 +78,7 @@ fun GestionScreen(etat: EtatApp, nav: NavController) {
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(start = 16.dp, end = 8.dp, bottom = 88.dp),
         ) {
-            itemsIndexed(exercices, key = { _, e -> e.id }) { index, e ->
+            items(exercices, key = { it.id }) { e ->
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -102,12 +100,6 @@ fun GestionScreen(etat: EtatApp, nav: NavController) {
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                    }
-                    IconButton(enabled = index > 0, onClick = { etat.scope.launch { etat.repo.deplacer(e, -1) } }) {
-                        Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Monter")
-                    }
-                    IconButton(enabled = index < exercices.lastIndex, onClick = { etat.scope.launch { etat.repo.deplacer(e, 1) } }) {
-                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Descendre")
                     }
                     Switch(
                         checked = !e.archive,
